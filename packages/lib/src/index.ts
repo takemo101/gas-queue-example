@@ -1,2 +1,3 @@
-export * from "./queue";
-export * from "./trigger";
+export * from './queue';
+export * from './lock';
+export * from './trigger';

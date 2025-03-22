@@ -4,7 +4,7 @@ const doPost = (
   e: GoogleAppsScript.Events.DoPost,
 ): GoogleAppsScript.Content.TextOutput => {
   // オプションを指定しない場合はGASのアクティブなスプレッドシートを利用する
-  const queue = SpreadsheetQueue.open();
+  const queue = SpreadsheetQueue.create();
 
   queue.enqueue(e.parameter);
 

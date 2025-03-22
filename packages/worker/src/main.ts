@@ -1,4 +1,8 @@
-import { SpreadsheetQueue, deleteTriggersByName } from '@queue/gas-lib';
+import {
+  CacheLock,
+  SpreadsheetQueue,
+  deleteTriggersByName,
+} from '@queue/gas-lib';
 import { z } from 'zod';
 
 /**
@@ -7,7 +11,8 @@ import { z } from 'zod';
 const parametersSchema = z.record(z.string());
 
 /**
- * トリガーを追加する
+ * キューを定期的に処理するためのトリガーを追加する
+ * キューを処理するにはこの関数を手動で実行する必要がある
  *
  * @returns void
  */
@@ -23,19 +28,27 @@ const addTrigger = () => {
  * @returns void
  */
 const handleQueue = () => {
-  const queue = SpreadsheetQueue.open<z.infer<typeof parametersSchema>>({
+  // envファイルからスプレッドシートIDを取得してキューを作成
+  const queue = SpreadsheetQueue.create<z.infer<typeof parametersSchema>>({
     spreadsheetId: process.env.QUEUE_SHEET_ID,
   });
 
-  while (queue.isEmpty() === false) {
-    const payload = queue.dequeue(parametersSchema.parse);
+  // dequeue中に他の処理が実行されると多重に処理されるため排他ロックを取得
+  const lock = CacheLock.create();
 
-    if (payload === null) {
-      continue;
+  // 排他ロックを取得してキューを処理する
+  // ロック中に他の処理が実行された場合はスキップされる
+  lock.runWithLock(() => {
+    while (queue.isEmpty() === false) {
+      const payload = queue.dequeue(parametersSchema.parse);
+
+      if (payload === null) {
+        continue;
+      }
+
+      Logger.log(payload);
     }
-
-    Logger.log(payload);
-  }
+  });
 };
 
 // @ts-expect-error

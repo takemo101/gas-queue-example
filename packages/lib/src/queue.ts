@@ -27,18 +27,21 @@ type DefaultQueueData = {
   [key: string]: string;
 };
 
+/**
+ * スプレッドシートを利用したキュー
+ */
 class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
-  constructor(private _sheet: GoogleAppsScript.Spreadsheet.Sheet) {
+  constructor(private sheet: GoogleAppsScript.Spreadsheet.Sheet) {
     //
   }
 
   /**
-   * スプレッドシートを開いてキューを取得します
+   * オプションからスプレッドシートを開いてキューを取得するfactoryメソッド
    *
-   * @param spreadsheetId
+   * @param options
    * @returns
    */
-  static open<T = DefaultQueueData>(
+  static create<T = DefaultQueueData>(
     options: SpreadsheetQueueOptions = {},
   ): Queue<T> {
     const { spreadsheetId, sheetName } = options;
@@ -48,6 +51,7 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
       ? SpreadsheetApp.openById(spreadsheetId)
       : SpreadsheetApp.getActiveSpreadsheet();
 
+    // シート名が指定されている場合は指定されたシートを取得する
     const sheet = sheetName
       ? spreadsheet.getSheetByName(sheetName)
       : spreadsheet.getActiveSheet();
@@ -68,7 +72,7 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
   enqueue(data: T): void {
     const dataString = JSON.stringify(data);
 
-    this._sheet.appendRow([dataString, new Date().toISOString()]);
+    this.sheet.appendRow([dataString, new Date().toISOString()]);
   }
 
   /**
@@ -78,7 +82,7 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
    * @returns
    */
   dequeue(parser?: DequeueParser<T>): T | null {
-    const range = this._sheet.getRange(1, 1);
+    const range = this.sheet.getRange(1, 1);
     const dataString = range.getValue();
 
     if (!dataString) {
@@ -90,7 +94,7 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
     // パーサーが指定されている場合はパースして返す
     const data = parser ? parser(parsedData) : (parsedData as T);
 
-    this._sheet.deleteRow(1);
+    this.sheet.deleteRow(1);
 
     return data;
   }
@@ -101,7 +105,7 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
    * @returns
    */
   isEmpty(): boolean {
-    const range = this._sheet.getRange(1, 1);
+    const range = this.sheet.getRange(1, 1);
     return range.isBlank();
   }
 
@@ -111,7 +115,7 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
    * @returns
    */
   size(): number {
-    const lastRow = this._sheet.getLastRow();
+    const lastRow = this.sheet.getLastRow();
 
     if (this.isEmpty()) {
       return 0;
@@ -121,4 +125,4 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
   }
 }
 
-export { SpreadsheetQueue };
+export { type Queue, SpreadsheetQueue };

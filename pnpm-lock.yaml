@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: ^1.9.4
         version: 1.9.4
+      '@google/clasp':
+        specifier: ^2.5.0
+        version: 2.5.0
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
