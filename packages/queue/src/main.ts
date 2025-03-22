@@ -6,6 +6,7 @@ const doPost = (
   // オプションを指定しない場合はGASのアクティブなスプレッドシートを利用する
   const queue = SpreadsheetQueue.create();
 
+  // リクエストパラメータをキューに追加する
   queue.enqueue(e.parameter);
 
   return ContentService.createTextOutput('キューを追加しました！');
