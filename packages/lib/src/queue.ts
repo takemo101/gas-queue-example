@@ -7,8 +7,19 @@ interface Queue<T> {
   size(): number;
 }
 
+/**
+ * openメソッドのスプレッドシートオプション
+ */
 type SpreadsheetQueueOptions = {
-  sheetId?: string;
+  /**
+   * キューとして利用しているスプレッドシートID
+   * デフォルトはアクティブなスプレッドシート
+   */
+  spreadsheetId?: string;
+  /**
+   * キューとして利用しているシート名
+   * デフォルトはアクティブなシート
+   */
   sheetName?: string;
 };
 
@@ -30,11 +41,11 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
   static open<T = DefaultQueueData>(
     options: SpreadsheetQueueOptions = {},
   ): Queue<T> {
-    const { sheetId, sheetName } = options;
+    const { spreadsheetId, sheetName } = options;
 
     // シートIDが指定されている場合は指定されたスプレッドシートを開く
-    const spreadsheet = sheetId
-      ? SpreadsheetApp.openById(sheetId)
+    const spreadsheet = spreadsheetId
+      ? SpreadsheetApp.openById(spreadsheetId)
       : SpreadsheetApp.getActiveSpreadsheet();
 
     const sheet = sheetName
