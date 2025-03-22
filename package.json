@@ -1,0 +1,19 @@
+{
+  "name": "gas-queue-worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "deploy:worker": "pnpm -F @queue/gas-worker run deploy",
+    "deploy:queue": "pnpm -F @queue/gas-queue run deploy",
+    "build": "pnpm recursive run build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "typescript": "^5.8.2"
+  }
+}
