@@ -88,7 +88,6 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
   /**
    * キューの先頭データを取得します
    *
-   * @param parser
    * @returns
    */
   dequeue(): T | null {
