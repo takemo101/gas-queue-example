@@ -2,7 +2,7 @@ type DequeueParser<T> = (data: unknown) => T;
 
 interface Queue<T> {
   enqueue(data: T): void;
-  dequeue(parser?: DequeueParser<T>): T | null;
+  dequeue(): T | null;
   isEmpty(): boolean;
   size(): number;
 }
@@ -10,7 +10,7 @@ interface Queue<T> {
 /**
  * openメソッドのスプレッドシートオプション
  */
-type SpreadsheetQueueOptions = {
+type SpreadsheetQueueOptions<T = DefaultQueueData> = {
   /**
    * キューとして利用しているスプレッドシートID
    * デフォルトはアクティブなスプレッドシート
@@ -21,6 +21,10 @@ type SpreadsheetQueueOptions = {
    * デフォルトはアクティブなシート
    */
   sheetName?: string;
+  /**
+   * デキュー時にデータをパースする関数
+   */
+  parser?: DequeueParser<T>;
 };
 
 type DefaultQueueData = {
@@ -31,7 +35,10 @@ type DefaultQueueData = {
  * スプレッドシートを利用したキュー
  */
 class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
-  constructor(private sheet: GoogleAppsScript.Spreadsheet.Sheet) {
+  constructor(
+    private sheet: GoogleAppsScript.Spreadsheet.Sheet,
+    private parser?: DequeueParser<T>,
+  ) {
     //
   }
 
@@ -42,7 +49,7 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
    * @returns
    */
   static create<T = DefaultQueueData>(
-    options: SpreadsheetQueueOptions = {},
+    options: SpreadsheetQueueOptions<T> = {},
   ): Queue<T> {
     const { spreadsheetId, sheetName } = options;
 
@@ -60,7 +67,10 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
       throw new Error(`${sheetName}シートが見つかりませんでした`);
     }
 
-    return new SpreadsheetQueue(sheet);
+    return new SpreadsheetQueue(
+      sheet,
+      options.parser as DequeueParser<T> | undefined,
+    );
   }
 
   /**
@@ -81,9 +91,10 @@ class SpreadsheetQueue<T = DefaultQueueData> implements Queue<T> {
    * @param parser
    * @returns
    */
-  dequeue(parser?: DequeueParser<T>): T | null {
+  dequeue(): T | null {
     const range = this.sheet.getRange(1, 1);
     const dataString = range.getValue();
+    const parser = this.parser;
 
     if (!dataString) {
       return null;
