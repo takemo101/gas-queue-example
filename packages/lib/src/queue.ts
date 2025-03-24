@@ -8,7 +8,7 @@ interface Queue<T> {
 }
 
 /**
- * openメソッドのスプレッドシートオプション
+ * createメソッドのスプレッドシートオプション
  */
 type SpreadsheetQueueOptions<T = DefaultQueueData> = {
   /**

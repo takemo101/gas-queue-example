@@ -4,6 +4,9 @@ interface Lock {
   runWithLock<T>(func: () => T): T | null;
 }
 
+/**
+ * createメソッドのオプション
+ */
 type CacheLockOptions = {
   /**
    * ロックキー
